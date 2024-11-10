@@ -1,3 +1,5 @@
+github.com/PeterHickman/expand_path v1.0.2 h1:E5NuRukO1VRSUBJJFiFqKHcPJFgzCJb8FGasXzRcavE=
+github.com/PeterHickman/expand_path v1.0.2/go.mod h1:pue22LojYg5BNpXkDIJwExMeAdq0RgNae/iQxxDu7/s=
 github.com/PeterHickman/toolbox v1.0.2 h1:3md3YGOQ6NjGwFNke3h5xDWhidb26SwvEtoNcKjEwNY=
 github.com/PeterHickman/toolbox v1.0.2/go.mod h1:R1OOjNp8kIWacudQi1SDZrCYnfjU5y/2yq3HCuTIHBg=
 github.com/mattn/go-sqlite3 v1.14.24 h1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=

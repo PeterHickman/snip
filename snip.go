@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"github.com/PeterHickman/expand_path"
 	"github.com/PeterHickman/toolbox"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
@@ -15,7 +16,8 @@ import (
 	"strings"
 )
 
-const database_file = "./snippets.sqlite3"
+const default_database_directory = "~/.config/snippets"
+const default_database_file = "snippets.sqlite3"
 
 type search_result struct {
 	nr    int64
@@ -23,6 +25,7 @@ type search_result struct {
 	score float64
 }
 
+var database_file string
 var db *sql.DB
 var option string
 var nr int64
@@ -123,6 +126,17 @@ func exportSnippet(title string, nr int64, content string) {
 	as_text, _ := base64.StdEncoding.DecodeString(content)
 	err := os.WriteFile(filename, as_text, 0644)
 	check(err)
+}
+
+func databaseName() string {
+	expanded_default_database_directory, _ := expand_path.ExpandPath(default_database_directory)
+
+	if _, err := os.Stat(expanded_default_database_directory); err != nil {
+		err = os.MkdirAll(expanded_default_database_directory, 0755)
+		check(err)
+	}
+
+	return expanded_default_database_directory + "/" + default_database_file
 }
 
 func initialiseDatabase() {
@@ -304,20 +318,29 @@ func export_snippets() {
 func init() {
 	var err error
 
+	l := flag.Bool("list", false, "List all the snippets")
+	d := flag.Bool("delete", false, "Delete the given snippet")
+	i := flag.Bool("import", false, "Import files into the database")
+	e := flag.Bool("export", false, "Export the database into files")
+	s := flag.Bool("search", false, "Search for snippets")
+	f := flag.String("file", "", "Name of an alternate snippets database file")
+
+	flag.Parse()
+
+	if *f != "" {
+		database_file = *f
+	} else {
+		database_file = databaseName()
+	}
+
+	fmt.Printf("Using %s\n", database_file)
+
 	if !toolbox.FileExists(database_file) {
 		initialiseDatabase()
 	}
 
 	db, err = sql.Open("sqlite3", database_file)
 	check(err)
-
-	l := flag.Bool("list", false, "List all the snippets")
-	d := flag.Bool("delete", false, "Delete the given snippet")
-	i := flag.Bool("import", false, "Import files into the database")
-	e := flag.Bool("export", false, "Export the database into files")
-	s := flag.Bool("search", false, "Search for snippets")
-
-	flag.Parse()
 
 	// First check the flags
 	if *l {
