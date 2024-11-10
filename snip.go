@@ -258,7 +258,7 @@ func search() {
 	})
 
 	for _, r := range results {
-		fmt.Printf("#%d (%f) : %s\n", r.nr, r.score, r.title)
+		fmt.Printf("#%d : %s\n", r.nr, r.title)
 	}
 }
 
