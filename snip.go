@@ -114,7 +114,7 @@ func addSnippet(title, filename string) {
 	err = tx.Commit()
 	check(err)
 
-	fmt.Printf("Imported [%s]\n", title)
+	fmt.Printf("#%d : %s\n", nr, title)
 }
 
 func exportSnippet(title string, nr int64, content string) {
