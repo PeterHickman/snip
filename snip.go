@@ -18,6 +18,7 @@ import (
 
 const default_database_directory = "~/.config/snippets"
 const default_database_file = "snippets.sqlite3"
+const real_name = "snip"
 
 type search_result struct {
 	nr    int64
@@ -412,7 +413,29 @@ func init() {
 			nr = v
 			option = "show"
 		} else {
-			dropdead("Number not supplied")
+			name := filepath.Base(os.Args[0])
+
+			if name != real_name {
+				if len(name) == len(real_name)+1 {
+					option_char := name[len(real_name):]
+					switch option_char {
+					case "l":
+						option = "list"
+					case "d":
+						option = "delete"
+					case "i":
+						option = "import"
+					case "e":
+						option = "export"
+					case "s":
+						option = "search"
+					default:
+						dropdead(fmt.Sprintf("Unknown command name suffix [%s]", option_char))
+					}
+				}
+			} else {
+				dropdead("Number not supplied")
+			}
 		}
 	}
 
