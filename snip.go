@@ -406,6 +406,28 @@ func init() {
 		}
 	}
 
+	name := filepath.Base(os.Args[0])
+
+	if name != real_name {
+		if len(name) == len(real_name)+1 {
+			option_char := name[len(real_name):]
+			switch option_char {
+			case "l":
+				option = "list"
+			case "d":
+				option = "delete"
+			case "i":
+				option = "import"
+			case "e":
+				option = "export"
+			case "s":
+				option = "search"
+			default:
+				dropdead(fmt.Sprintf("Unknown command name suffix [%s]", option_char))
+			}
+		}
+	}
+
 	// Then see if Arg(0) is a number
 	if len(flag.Args()) == 1 && option == "" {
 		v, err := isNumber(flag.Arg(0))
@@ -413,29 +435,7 @@ func init() {
 			nr = v
 			option = "show"
 		} else {
-			name := filepath.Base(os.Args[0])
-
-			if name != real_name {
-				if len(name) == len(real_name)+1 {
-					option_char := name[len(real_name):]
-					switch option_char {
-					case "l":
-						option = "list"
-					case "d":
-						option = "delete"
-					case "i":
-						option = "import"
-					case "e":
-						option = "export"
-					case "s":
-						option = "search"
-					default:
-						dropdead(fmt.Sprintf("Unknown command name suffix [%s]", option_char))
-					}
-				}
-			} else {
-				dropdead("Number not supplied")
-			}
+			dropdead("Number not supplied")
 		}
 	}
 
