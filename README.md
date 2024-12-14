@@ -2,7 +2,7 @@
 
 When I hit a problem I Google for a solution and after finding what I need (probably on Stackoverflow) I end up with a small snippet of code that I squirrel away in a file somewhere on my computer
 
-The keys word here is _somewhere_! I then have to look all over several drives to find it. I know I kept it, but the where eludes me. So I will probably end up on Stackoverflow again, create another small text file and puts it somewhere to keep it safe
+The keyword here is _somewhere_! I then have to look all over several drives to find it. I know I kept it, but the where eludes me. So I will probably end up on Stackoverflow again, create another small text file and puts it somewhere to keep it safe
 
 Rinse and repeat
 
