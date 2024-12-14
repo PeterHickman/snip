@@ -5,15 +5,19 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/PeterHickman/expand_path"
-	"github.com/PeterHickman/toolbox"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/PeterHickman/expand_path"
+	"github.com/PeterHickman/toolbox"
+	"github.com/alecthomas/chroma/v2/formatters"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v2/styles"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const default_database_directory = "~/.config/snippets"
@@ -218,23 +222,47 @@ func list() {
 	check(err)
 }
 
+func formattedOutput(nr int64, title, ext, content string) {
+	fmt.Printf("#%d : %s\n", nr, title)
+	fmt.Println()
+
+	filename := fmt.Sprintf("filename.%s", ext)
+
+	lexer := lexers.Match(filename)
+	if lexer == nil {
+		lexer = lexers.Fallback
+	}
+
+	style := styles.Get("pygments")
+	if style == nil {
+		style = styles.Fallback
+	}
+
+	formatter := formatters.Get("terminal256")
+	if formatter == nil {
+		formatter = formatters.Fallback
+	}
+
+	contents, _ := base64.StdEncoding.DecodeString(content)
+	iterator, _ := lexer.Tokenise(nil, string(contents))
+	formatter.Format(os.Stdout, style, iterator)
+}
+
 func show() {
-	stmt, err := db.Prepare("SELECT title, nr, content FROM snippets WHERE nr = ?")
+	stmt, err := db.Prepare("SELECT title, nr, ext, content FROM snippets WHERE nr = ?")
 	check(err)
 	defer stmt.Close()
 
 	var title string
 	var nr int64
+	var ext string
 	var content string
 
-	err = stmt.QueryRow(flag.Arg(0)).Scan(&title, &nr, &content)
+	err = stmt.QueryRow(flag.Arg(0)).Scan(&title, &nr, &ext, &content)
 	if err != nil {
 		dropdead(fmt.Sprintf("There is no snippet %s", flag.Arg(0)))
 	}
-	fmt.Printf("#%d : %s\n", nr, title)
-	fmt.Println()
-	as_text, _ := base64.StdEncoding.DecodeString(content)
-	fmt.Println(string(as_text))
+	formattedOutput(nr, title, ext, content)
 }
 
 func delete() {
