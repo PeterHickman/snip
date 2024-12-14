@@ -47,13 +47,23 @@ func isNumber(text string) (int64, error) {
 	return v, err
 }
 
-func cleanName(filename string) string {
+func cleanName(filename string) (string, string) {
 	c := filepath.Base(filename)
 	c = strings.ToLower(c)
+
+	// Find the extension
+	li := strings.LastIndex(c, ".")
+	if li == -1 {
+		dropdead(fmt.Sprintf("Unable to add a file without an extension [%s]", filename))
+	}
+
+	e := c[li+1:]
+	c = c[:li]
+
 	c = strings.Replace(c, "_", " ", -1)
 	c = strings.Replace(c, ".txt", "", 1)
 
-	return c
+	return c, e
 }
 
 func newTitle(title string) bool {
@@ -69,9 +79,9 @@ func newTitle(title string) bool {
 	return err != nil
 }
 
-func filenameFromTitle(title string) string {
+func filenameFromTitle(title, ext string) string {
 	c := strings.Replace(title, " ", "_", -1)
-	c = flag.Arg(0) + "/" + c + ".txt"
+	c = flag.Arg(0) + "/" + c + "." + ext
 
 	return c
 }
@@ -97,7 +107,7 @@ func nextNr() int64 {
 	return r
 }
 
-func addSnippet(title, filename string) {
+func addSnippet(title, filename, ext string) {
 	nr := nextNr()
 
 	dat, err := os.ReadFile(filename)
@@ -108,11 +118,11 @@ func addSnippet(title, filename string) {
 	tx, err := db.Begin()
 	check(err)
 
-	stmt, err := tx.Prepare("INSERT INTO snippets(title, nr, content) VALUES (?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO snippets(title, nr, ext, content) VALUES (?, ?, ?, ?)")
 	check(err)
 	defer stmt.Close()
 
-	_, err = stmt.Exec(title, nr, content)
+	_, err = stmt.Exec(title, nr, ext, content)
 	check(err)
 
 	err = tx.Commit()
@@ -121,8 +131,8 @@ func addSnippet(title, filename string) {
 	fmt.Printf("#%d : %s\n", nr, title)
 }
 
-func exportSnippet(title string, nr int64, content string) {
-	filename := filenameFromTitle(title)
+func exportSnippet(title string, nr int64, ext string, content string) {
+	filename := filenameFromTitle(title, ext)
 
 	as_text, _ := base64.StdEncoding.DecodeString(content)
 	err := os.WriteFile(filename, as_text, 0644)
@@ -148,7 +158,7 @@ func initialiseDatabase() {
 	db, err = sql.Open("sqlite3", database_file)
 	check(err)
 
-	_, err = db.Exec("CREATE TABLE snippets (title TEXT NOT NULL, nr INTEGER NOT NULL, content BLOB NOT NULL)")
+	_, err = db.Exec("CREATE TABLE snippets (title TEXT NOT NULL, nr INTEGER NOT NULL, ext TEXT NOT NULL, content BLOB NOT NULL)")
 	check(err)
 	db.Close()
 }
@@ -284,9 +294,9 @@ func import_snippets() {
 	for _, filename := range flag.Args() {
 		total++
 
-		title := cleanName(filename)
+		title, ext := cleanName(filename)
 		if newTitle(title) {
-			addSnippet(title, filename)
+			addSnippet(title, filename, ext)
 			added++
 		}
 	}
@@ -299,18 +309,19 @@ func import_snippets() {
 }
 
 func export_snippets() {
-	rows, err := db.Query("SELECT title, nr, content FROM snippets ORDER BY title")
+	rows, err := db.Query("SELECT title, nr, ext, content FROM snippets ORDER BY title")
 	check(err)
 
 	defer rows.Close()
 	for rows.Next() {
 		var title string
 		var nr int64
+		var ext string
 		var content string
 
-		err = rows.Scan(&title, &nr, &content)
+		err = rows.Scan(&title, &nr, &ext, &content)
 		check(err)
-		exportSnippet(title, nr, content)
+		exportSnippet(title, nr, ext, content)
 	}
 	err = rows.Err()
 	check(err)
