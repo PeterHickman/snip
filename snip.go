@@ -233,7 +233,7 @@ func formattedOutput(nr int64, title, ext, content string) {
 		lexer = lexers.Fallback
 	}
 
-	style := styles.Get("pygments")
+	style := styles.Get("emacs")
 	if style == nil {
 		style = styles.Fallback
 	}
