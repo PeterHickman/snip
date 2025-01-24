@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	ac "github.com/PeterHickman/ansi_colours"
 	"github.com/PeterHickman/expand_path"
 	"github.com/PeterHickman/toolbox"
 	"github.com/alecthomas/chroma/v2/formatters"
@@ -180,7 +181,7 @@ func searchTerms() []string {
 	return l
 }
 
-func searchRecord(search_terms []string, title string) float64 {
+func searchRecord(search_terms []string, title string) (float64, string) {
 	record_terms := []string{}
 
 	for _, v := range strings.Fields(title) {
@@ -191,19 +192,23 @@ func searchRecord(search_terms []string, title string) float64 {
 	}
 
 	var s float64 = 0.0
+	var t []string
 
-	for _, st := range search_terms {
-		for _, rt := range record_terms {
+	for _, rt := range record_terms {
+		r := rt
+		for _, st := range search_terms {
 			if strings.HasPrefix(rt, st) {
 				s += 1.0
+				r = ac.Green(rt)
 				break
 			}
 		}
+		t = append(t, r)
 	}
 
 	s = s / float64(len(search_terms))
 
-	return s
+	return s, strings.Join(t, " ")
 }
 
 func list() {
@@ -298,9 +303,9 @@ func search() {
 		var nr int64
 		err = rows.Scan(&title, &nr)
 		check(err)
-		r := searchRecord(search_terms, title)
+		r, searched_title := searchRecord(search_terms, title)
 		if r > 0.0 {
-			results = append(results, search_result{nr: nr, title: title, score: r})
+			results = append(results, search_result{nr: nr, title: searched_title, score: r})
 		}
 	}
 	err = rows.Err()

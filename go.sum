@@ -1,3 +1,5 @@
+github.com/PeterHickman/ansi_colours v1.0.3 h1:aIht+mAwQq69XiJFnXaAhELdotNu0iPmPg5CQWw2Nuw=
+github.com/PeterHickman/ansi_colours v1.0.3/go.mod h1:IWsludjGb9SEkbYYuAUKBDbHdYCCNXh6OteHOgi0m3o=
 github.com/PeterHickman/expand_path v1.0.2 h1:E5NuRukO1VRSUBJJFiFqKHcPJFgzCJb8FGasXzRcavE=
 github.com/PeterHickman/expand_path v1.0.2/go.mod h1:pue22LojYg5BNpXkDIJwExMeAdq0RgNae/iQxxDu7/s=
 github.com/PeterHickman/toolbox v1.0.2 h1:3md3YGOQ6NjGwFNke3h5xDWhidb26SwvEtoNcKjEwNY=
